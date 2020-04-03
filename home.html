@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hot Restaurant</title>
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="./css/style.css">
+  <!-- Favicon -->
+  <link rel="shortcut icon" href="./Images/r.ico" />
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery.js"></script>
+  <!-- Bootstrap -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="jumbotron" style="text-align: center;">
+      <h1><span class="custom-fire fas fa-fire-alt"></span> <b class="custom-title">HOT</b> Restaurant</h1>
+      <hr>
+      <h3 style="display: inline;">Book your seat before they are all gone!</h3>
+      <h6 style="display: inline;" id="availability"></h6>
+      <br /><br />
+      <a href="/view"><button class="btn btn-primary btn-lg"><span class="far fa-eye"></span> View Tables</button></a><!-- /add -->
+      <a href="/make"><button class="btn btn-danger btn-lg"><span class="far fa-edit"></span> Make Reservation</button></a><!-- /api/characters -->
+      <br /><br />
+      <div class="api-links">
+        <a href="/api/tables"><span class="custom-pepper fas fa-pepper-hot"></span> API Table Link</a>
+        <a href="/api/waitlist"><span class="custom-pepper fas fa-pepper-hot"></span> API Wait List</a>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    $.get("/api/tables/length", function(data) {
+      // console.log(`[HOME.html - GET = "/api/tables/length"] Tables available = ${data}`);
+      data > 0 ? $("#availability").text(`  *Only ${data} tables available`) : $("#availability").text(`  *NO more tables available. Wait List now!`);
+    });
+  </script>
+</body>
+</html>

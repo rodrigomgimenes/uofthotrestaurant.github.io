@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hot Restaurant</title>
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="./css/style.css">
+  <!-- Favicon -->
+  <link rel="shortcut icon" href="./Images/r.ico" />
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery.js"></script>
+  <!-- Bootstrap -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+  <!-- HEADER -->
+  <div class="container">
+    <div class="jumbotron" style="text-align: center;">
+      <h1><span class="custom-fire fas fa-fire-alt"></span> <b class="custom-title">HOT</b> Restaurant</h1>
+      <hr>
+      <h3 style="display: inline;">Book your reservation here!</h3>
+      <h6 style="display: inline;" id="availability"></h6>
+      <br /><br />
+      <a href="/view"><button class="btn btn-primary btn-lg"><span class="far fa-eye"></span> View Tables</button></a>
+      <br /><br />
+      <div class="api-links">
+        <a href="/api/tables"><span class="custom-pepper fas fa-pepper-hot"></span> API Table Link</a>
+        <a href="/api/waitlist"><span class="custom-pepper fas fa-pepper-hot"></span> API Wait List</a>
+      </div>
+      <div class="button-wrapper">
+        <div class="layer">
+          <a href="/"><button id="extra-center-button" class="extra-next-button fas fa-home"></button></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="container">
+    <div id="reserved-table-card" class="jumbotron">
+      <h3><b class="custom-title">Table</b> Reservation</h3>
+      <hr>
+
+      <form role="form">
+        <div class="form-group">
+          <label for="fullname"><span class="custom-fire fas fa-user"></span></label>
+          <input type="name" class="form-control" id="fullname" placeholder="< Name />">
+          
+          <label for="uniqueid"><span class="custom-fire far fa-id-badge"></span></label>
+          <input type="text" class="form-control" id="uniqueid" placeholder="< Unique ID />"  style="width: 552px;" readonly>
+        </div>
+
+        <div class="form-group">
+          <label for="email"><span class="custom-fire fas fa-envelope"></span></label>
+          <input type="email" class="form-control" id="email" placeholder="< Email />">
+          
+          <label for="telephone"><span class="custom-fire fas fa-mobile-alt"></span></label>
+          <input type="text" class="form-control" id="code" placeholder="< Code />" style="width: 90px; margin-right: 5px;" maxlength="3" onkeypress="return (event.charCode != 8 && event.charCode == 0 || ( event.charCode == 46 || (event.charCode >= 48 && event.charCode <= 57)))">
+          <input type="text" class="form-control" id="telephone" placeholder="< Phone number />" style="width: 400px;" maxlength="7" onkeypress="return (event.charCode != 8 && event.charCode == 0 || ( event.charCode == 46 || (event.charCode >= 48 && event.charCode <= 57)))">
+        </div>
+
+        <div class="form-group">
+          <label for="npeople"><span class="custom-fire fas fa-user-friends"></span></label>
+          <select id="npeople">
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="4+">4+</option>
+          </select>
+        </div>
+
+        <a href="" id="submit-btn" class="btn btn-success" role="button">SUBMIT</a>
+      </form>
+
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    function getTablesAvailable() {
+      $.get("/api/tables/length", function(data) {
+        console.log(`[MAKE.html - GET = "/api/tables/length"] Tables available = ${data}`);
+        data > 0 ? $("#availability").text(`  *Only ${data} tables available`) : $("#availability").text(`  *NO more tables available. Wait List now!`);
+      });
+    }
+
+    getTablesAvailable();
+
+    $("#submit-btn").on("click", (event) => {
+      event.preventDefault();
+      // Generates (random) Unique ID:
+      let guid = () => {
+        let s4 = () => {
+          return Math.floor((1 + Math.random()) * 0x10000)
+            .toString(16)
+            .substring(1);
+        }
+        // Return ID of format 'aaaaaaaa'-'aaaa'-'aaaa'-'aaaa'-'aaaaaaaaaaaa'
+        return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+      }
+
+      // console.log(`[MAKE.html - "#submit-btn" click] Unique ID generated: ${guid()}`);
+
+      const newReservation = {
+        routeName: "",
+        fullname:  $("#fullname").val().trim(),
+        uniqueid:  guid(),
+        email:     $("#email").val().trim(),
+        telephone: $("#code").val().trim() + $("#telephone").val().trim(),
+        npeople:   $("#npeople").val().trim()
+      };
+
+      // console.log(`[MAKE.html - "#submit-btn" click] NEW Reservation:  ${newReservation}`);
+
+      $.post("/api/tables", newReservation,
+        function(data) {
+          // console.log(`[MAKE.html - POST = "/api/tables"]  ${data}`);
+
+          getTablesAvailable();
+          data > 0 ? console.log("Reservation completed!") : console.log("ALL tables reserved. You're on the Wait List!");
+          // if (data > 0) {
+          //   console.log("Reservation completed!");
+          //   $("#availability").text(`  *Only ${data} tables available`);
+          // }
+          // else {
+          //   console.log("ALL tables reserved. You're on the Wait List!");
+          //   $("#availability").text(`  *NO more tables available. Wait List now!`);
+          // }
+
+          // Clear fields
+          $("#fullname").val("");
+          $("#uniqueid").val("");
+          $("#email").val("");
+          $("#code").val("")
+          $("#telephone").val("");
+          $("#npeople").val("2");
+        });
+    });
+  </script>
+</body>
+</html>

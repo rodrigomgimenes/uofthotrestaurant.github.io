@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hot Restaurant</title>
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="./css/style.css">
+  <!-- Favicon -->
+  <link rel="shortcut icon" href="./Images/r.ico" />
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery.js"></script>
+  <!-- Bootstrap -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="jumbotron" style="text-align: center;">
+      <h1><span class="custom-fire fas fa-fire-alt"></span> <b class="custom-title">HOT</b> Restaurant</h1>
+      <hr>
+      <h3 style="display: inline;">Current Reservations and Waiting List</h3>
+      <h6 style="display: inline;" id="availability"></h6>
+      <br /><br />
+      <a href="/make"><button class="btn btn-danger btn-lg"><span class="far fa-edit"></span> Make Reservation</button></a>
+      <br /><br />
+      <div class="clear-table" style="display: inline;">
+        <!-- Clear Table -->
+        <a href="" id="clear-btn"><span class="fas fa-trash"></span> Clear Table</a>
+      </div>
+      <div class="api-links" style="display: inline;">
+        <a href="/api/tables"><span class="custom-pepper fas fa-pepper-hot"></span> API Table Link</a>
+        <a href="/api/waitlist"><span class="custom-pepper fas fa-pepper-hot"></span> API Wait List</a>
+      </div>
+      <div class="button-wrapper">
+        <div class="layer">
+          <a href="/"><button id="extra-center-button" class="extra-next-button fas fa-home"></button></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="container">
+    <div id="reserved-table-card" class="jumbotron">
+      <h3><b class="custom-title">Current</b> Reservations</h3>
+      <hr>
+
+      <!-- CARD - TABLE RESERVED -->
+      <!-- <div class="card_custom">
+        <div class="card_left white">
+          <img src="./Images/pepper-red-hot-card-white.jpg" alt="Hot Pepper">
+          <div class="top-centered"><span class="custom-fire fas fa-fire-alt"></span> <b class="custom-title">HOT</b> Restaurant</div>
+        </div>
+        <div class="card_right white">
+          <h1>Table: #001</h1>
+          <div class="card_right__details">
+            <p><span class="custom-pepper-reserved fas fa-pepper-hot"></span> Reserved</p>
+            <div class="card_right__review white">
+              <ul>
+                <li id="uniqueid"><span class="far fa-id-badge"></span> ID: </li>
+                <li id="fullname"><span class="fas fa-user"></span> Name: </li>
+                <li id="email"><span class="fas fa-envelope"></span> Email: </li>
+                <li id="telephone"><span class="fas fa-mobile-alt"></span> Contact: </li>
+                <li id="npeople"><span class="fas fa-user-friends"></span> People : </li>
+              </ul>
+            </div> -->
+            <!-- <div class="card_right__cancel white">
+              <a href="" class="user-cancel"><span class="fas fa-user-times"></span></a>
+            </div> -->
+          <!-- </div>
+          <div class="card_right__reserved">
+            <a href="" id="table-reserved"><span class="fas fa-user-check"></span></a>
+          </div>
+        </div>
+      </div> -->
+
+    </div>
+
+    <div id="waiting-table-card" class="jumbotron">
+      <h3><b class="custom-title">Waiting</b> List</h3>
+      <hr>
+      <!-- CARD - WAITING LIST -->
+      <!-- <div class="card_custom">
+        <div class="card_left black">
+          <img src="./Images/pepper-red-hot-card-black.jpg" alt="Hot Pepper">
+          <div class="top-centered"><span class="custom-fire fas fa-fire-alt"></span> <b class="custom-title">HOT</b> Restaurant</div>
+        </div>
+        <div class="card_right black">
+          <h1>Table: #001</h1>
+          <div class="card_right__details">
+            <p><span class="custom-pepper-reserved fas fa-pepper-hot"></span> Reserved</p>
+            <div class="card_right__review black">
+              <ul>
+                <li id="uniqueid"><span class="far fa-id-badge"></span> ID: </li>
+                <li id="fullname"><span class="fas fa-user"></span> Name: </li>
+                <li id="email"><span class="fas fa-envelope"></span> Email: </li>
+                <li id="telephone"><span class="fas fa-mobile-alt"></span> Contact: </li>
+                <li id="npeople"><span class="fas fa-user-friends"></span> People : </li>
+              </ul>
+            </div> -->
+            <!-- <div class="card_right__cancel black">
+              <a href="" class="user-cancel"><span class="fas fa-user-times"></span></a>
+            </div> -->
+          <!-- </div>
+          <div class="card_right__reserved">
+            <a href="" id="table-reserved"><span class="fas fa-user-clock"></span></a>
+          </div>
+        </div>
+      </div> -->
+
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    $.get("/api/tables/length", function(data) {
+      // console.log(`[VIEW.html - GET = "/api/tables/length"] Tables available = ${data}`);
+      data > 0 ? $("#availability").text(`  *Only ${data} tables available`) : $("#availability").text(`  *NO more tables available. Wait List now!`);
+    });
+
+    let apiPath;
+    
+    for (let index = 0; index < 2; index++) {
+      switch (index) {
+        case 0:
+          apiPath = "/api/tables";
+          break;
+      
+        case 1:
+          apiPath = "/api/waitlist"
+          break;
+      }
+      $.get(apiPath, function(data) {
+        // console.log(`[VIEW.html - GET = "${apiPath}"] for LOOP:  ${data}`);
+        if (data) {
+          createViewCard(data, index);
+        }
+      });
+    }
+
+    $("#clear-btn").on("click", (event) => {
+      event.preventDefault();
+
+      $.post("/api/tables/clear", function(data) {
+        if (data) {
+          console.log("Clear table completed!");
+          $("#availability").text(`  *Only 5 tables available`);
+
+          // Re-load page
+          window.location.href = "/view";
+        }
+        else {
+          console.log("ERROR: operation unsuccessful");
+        }
+      });
+    });
+
+    function createViewCard(dataArray, idArray) {
+      // Creating CARD
+      if (dataArray.length > 0) {
+        const typeCard  = (idArray === 0) ? "white" : "black";
+        const typeIcon  = (idArray === 0) ? "check" : "clock";
+        const finalForm = (idArray === 0) ? $("#reserved-table-card") : $("#waiting-table-card");
+
+        for (let i = 0; i < dataArray.length; i++) {
+          const numberTable = ('000' + (i+1).toString()).slice(-3);
+          // console.log(`[VIEW.html - "createViewCard"] Table Number: ${numberTable}`);
+
+          let formatPhoneNumber = (telephone) => {
+            //Filter only numbers from the input
+            let cleaned = ('' + telephone).replace(/\D/g, '');
+            // console.log(`[VIEW.html - "createViewCard"] Phone Number non-formatted: ${cleaned}`);
+  
+            //Check if the input is of correct length
+            let match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+
+            if (match) {
+              return '(' + match[1] + ') ' + match[2] + '-' + match[3]
+            };
+
+            return telephone // null
+          };
+          // CARD - TABLE RESERVED or WAITING LIST
+          const customCard = 
+          `
+          <div class="card_custom">
+            <div class="card_left ${typeCard}">
+              <img src="./Images/pepper-red-hot-card-${typeCard}.jpg" alt="Hot Pepper">
+              <div class="top-centered"><span class="custom-fire fas fa-fire-alt"></span> <b class="custom-title">HOT</b> Restaurant</div>
+            </div>
+            <div class="card_right ${typeCard}">
+              <h1>Table: #${numberTable}</h1>
+              <div class="card_right__details">
+                <p><span class="custom-pepper-reserved fas fa-pepper-hot"></span> Reserved</p>
+                <div class="card_right__review ${typeCard}">
+                  <ul>
+                    <li id="uniqueid"><span class="far fa-id-badge"></span> ID: ${dataArray[i].uniqueid}</li>
+                    <li id="fullname"><span class="fas fa-user"></span> Name: ${dataArray[i].fullname}</li>
+                    <li id="email"><span class="fas fa-envelope"></span> Email: ${dataArray[i].email}</li>
+                    <li id="telephone"><span class="fas fa-mobile-alt"></span> Contact: ${formatPhoneNumber(dataArray[i].telephone)}</li>
+                    <li id="npeople"><span class="fas fa-user-friends"></span> People: ${dataArray[i].npeople}</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="card_right__reserved">
+                <a href="" id="table-reserved"><span class="fas fa-user-${typeIcon}"></span></a>
+              </div>
+            </div>
+          </div>
+          `;
+          
+          // Appending ALL information
+          finalForm.append(customCard);
+        }
+      }
+    }
+  </script>
+</body>
+</html>
